@@ -11,12 +11,8 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-app.use(cors({
-  origin: 'https://stock-simple-three.vercel.app',
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
-
+// Middleware
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -26,7 +22,6 @@ app.use('/api/products', productRoutes);
 app.use('/api/movements', movementRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/reports', reportRoutes);
-
 
 // Health check
 app.get('/health', (req, res) => {
