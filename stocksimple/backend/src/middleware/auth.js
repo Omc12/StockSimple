@@ -1,4 +1,4 @@
-const { verifyToken } = require('../utils/jwtHelper');
+const { verifyAccessToken } = require('../utils/jwtHelper');
 const { PrismaClient } = require('@prisma/client');
 
 const prisma = new PrismaClient();
@@ -11,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ message: 'No token provided' });
     }
 
-    const decoded = verifyToken(token);
+  const decoded = verifyAccessToken(token);
 
     if (!decoded) {
       return res.status(401).json({ message: 'Invalid or expired token' });

@@ -1,13 +1,14 @@
-const { Pool } = require('pg');
+const { PrismaClient } = require('@prisma/client');
 require('dotenv').config();
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
+// Single Prisma client instance
+const prisma = new PrismaClient({
+  log: ['error', 'warn'],
 });
 
-module.exports = {
-  query: (text, params) => pool.query(text, params),
-};
+// Optional raw query helper (use sparingly)
+async function raw(query, params) {
+  return prisma.$queryRawUnsafe(query, ...(params || []));
+}
+
+module.exports = { prisma, raw };

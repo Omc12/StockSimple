@@ -19,28 +19,29 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     const response = await authAPI.login(credentials);
-    const { token, user } = response.data;
-    
-    localStorage.setItem('token', token);
+    const { token, accessToken, refreshToken, user } = response.data;
+    const access = token || accessToken;
+    if (access) localStorage.setItem('token', access);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
-    
     return response.data;
   };
 
   const register = async (userData) => {
     const response = await authAPI.register(userData);
-    const { token, user } = response.data;
-    
-    localStorage.setItem('token', token);
+    const { token, accessToken, refreshToken, user } = response.data;
+    const access = token || accessToken;
+    if (access) localStorage.setItem('token', access);
+    if (refreshToken) localStorage.setItem('refreshToken', refreshToken);
     localStorage.setItem('user', JSON.stringify(user));
     setUser(user);
-    
     return response.data;
   };
 
   const logout = () => {
     localStorage.removeItem('token');
+  localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(null);
   };
