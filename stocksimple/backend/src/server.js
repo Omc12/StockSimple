@@ -31,6 +31,10 @@ app.get('/health', (req, res) => {
 // Error handling
 app.use(errorHandler);
 
+app.use(cors({
+  origin: 'https://stocksimplee.vercel.app',
+  credentials: true
+}));
 const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
