@@ -11,7 +11,7 @@ import InventoryLog from './pages/InventoryLog';
 import StockUpdate from './pages/StockUpdate';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import './styles/index.css';
+import './index.css';
 
 function App() {
   return (
