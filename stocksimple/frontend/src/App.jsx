@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard';
 import ProductCatalog from './pages/ProductCatalog';
 import InventoryLog from './pages/InventoryLog';
 import StockUpdate from './pages/StockUpdate';
+import AddProduct from './pages/AddProduct';
+import Reports from './pages/Reports';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import './index.css';
@@ -41,6 +43,14 @@ function App() {
                 }
               />
               <Route
+                path="/add-product"
+                element={
+                  <ProtectedRoute>
+                    <AddProduct />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/inventory-log"
                 element={
                   <ProtectedRoute>
@@ -53,6 +63,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <StockUpdate />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/reports"
+                element={
+                  <ProtectedRoute>
+                    <Reports />
                   </ProtectedRoute>
                 }
               />

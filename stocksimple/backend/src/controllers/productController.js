@@ -1,13 +1,11 @@
-const { PrismaClient } = require('@prisma/client');
-
-const prisma = new PrismaClient();
+const { prisma } = require('../config/database');
 
 // Get all products with current stock levels
 const getAllProducts = async (req, res) => {
     try {
         const products = await prisma.product.findMany({
             orderBy: { name: 'asc' },
-        }); // Fetch all products from the database
+        });
 
         res.json(products);
     } catch (error) {
