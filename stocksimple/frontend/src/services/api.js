@@ -23,18 +23,19 @@ export const authAPI = {
   refresh: (refreshToken) => api.post('/auth/refresh', { refreshToken }),
 };
 
+// Products API
 export const getProducts = () => api.get('/products');
-
+export const getProductById = (id) => api.get(`/products/${id}`);
 export const createProduct = (product) => api.post('/products', product);
-
 export const updateProduct = (sku, product) => api.put(`/products/${sku}`, product);
+export const deleteProduct = (id) => api.delete(`/products/${id}`);
 
+// Stock Movements API
 export const logStockMovement = (movement) => api.post('/movements', movement);
-
 export const getStockMovements = () => api.get('/movements');
 
+// Dashboard & Reports API
 export const getLowStockAlerts = () => api.get('/dashboard/alerts');
-
 export const getTopLowReports = () => api.get('/reports/toplow');
 
 export default api;
