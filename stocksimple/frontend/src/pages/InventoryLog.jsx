@@ -6,11 +6,11 @@ const InventoryLog = () => {
     const [movements, setMovements] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [filter, setFilter] = useState('all'); // all, in, out
+    const [filter, setFilter] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState('date'); // date, product, quantity
-    const [sortOrder, setSortOrder] = useState('desc'); // asc, desc
-    const [dateRange, setDateRange] = useState('all'); // all, today, week, month
+    const [sortBy, setSortBy] = useState('date');
+    const [sortOrder, setSortOrder] = useState('desc');
+    const [dateRange, setDateRange] = useState('all');
 
     useEffect(() => {
         fetchMovements();
@@ -56,7 +56,6 @@ const InventoryLog = () => {
         return true;
     };
 
-    // Apply all filters
     const filteredMovements = movements.filter(m => {
         // Type filter
         if (filter !== 'all' && m.type !== filter) return false;
