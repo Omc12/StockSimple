@@ -10,6 +10,9 @@ const ProductCatalog = () => {
     const [editingProduct, setEditingProduct] = useState(null);
     const [editForm, setEditForm] = useState({});
     const [deleteConfirm, setDeleteConfirm] = useState(null);
+    const [stockFilter, setStockFilter] = useState('all'); // all, in-stock, low-stock, out-of-stock
+    const [sortBy, setSortBy] = useState('name'); // name, sku, stock, cost
+    const [sortOrder, setSortOrder] = useState('asc'); // asc, desc
 
     useEffect(() => {
         fetchProducts();
@@ -55,9 +58,73 @@ const ProductCatalog = () => {
         }
     };
 
-    const filteredProducts = products.filter(product =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        product.sku.toLowerCase().includes(searchTerm.toLowerCase())
+    const handleSort = (column) => {
+        if (sortBy === column) {
+            setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc');
+        } else {
+            setSortBy(column);
+            setSortOrder('asc');
+        }
+    };
+
+    // Filter products
+    const filteredProducts = products.filter(product => {
+        // Search filter
+        const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            product.sku.toLowerCase().includes(searchTerm.toLowerCase());
+        
+        // Stock status filter
+        let matchesStockFilter = true;
+        if (stockFilter === 'in-stock') {
+            matchesStockFilter = product.currentStock > product.reorderPoint;
+        } else if (stockFilter === 'low-stock') {
+            matchesStockFilter = product.currentStock > 0 && product.currentStock <= product.reorderPoint;
+        } else if (stockFilter === 'out-of-stock') {
+            matchesStockFilter = product.currentStock === 0;
+        }
+
+        return matchesSearch && matchesStockFilter;
+    });
+
+    // Sort products
+    const sortedProducts = [...filteredProducts].sort((a, b) => {
+        let compareA, compareB;
+        
+        switch (sortBy) {
+            case 'name':
+                compareA = a.name.toLowerCase();
+                compareB = b.name.toLowerCase();
+                break;
+            case 'sku':
+                compareA = a.sku.toLowerCase();
+                compareB = b.sku.toLowerCase();
+                break;
+            case 'stock':
+                compareA = a.currentStock;
+                compareB = b.currentStock;
+                break;
+            case 'cost':
+                compareA = a.cost;
+                compareB = b.cost;
+                break;
+            default:
+                compareA = a.name.toLowerCase();
+                compareB = b.name.toLowerCase();
+        }
+
+        if (compareA < compareB) return sortOrder === 'asc' ? -1 : 1;
+        if (compareA > compareB) return sortOrder === 'asc' ? 1 : -1;
+        return 0;
+    });
+
+    const SortIcon = ({ column }) => (
+        <span className="ml-1 inline-block">
+            {sortBy === column ? (
+                sortOrder === 'asc' ? '↑' : '↓'
+            ) : (
+                <span className="text-gray-600">↕</span>
+            )}
+        </span>
     );
 
     if (loading) {
@@ -86,8 +153,9 @@ const ProductCatalog = () => {
                 </Link>
             </div>
 
-            {/* Search Bar */}
-            <div className="mb-6">
+            {/* Search and Filters */}
+            <div className="mb-6 space-y-4">
+                {/* Search Bar */}
                 <div className="relative">
                     <svg className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -100,18 +168,65 @@ const ProductCatalog = () => {
                         className="w-full pl-10 pr-4 py-3 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
                     />
                 </div>
+
+                {/* Filter and Sort Row */}
+                <div className="flex flex-wrap gap-3">
+                    {/* Stock Status Filter */}
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setStockFilter('all')}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                stockFilter === 'all' 
+                                    ? 'bg-blue-600 text-white' 
+                                    : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                            }`}
+                        >
+                            All ({products.length})
+                        </button>
+                        <button
+                            onClick={() => setStockFilter('in-stock')}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                stockFilter === 'in-stock' 
+                                    ? 'bg-green-600 text-white' 
+                                    : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                            }`}
+                        >
+                            In Stock ({products.filter(p => p.currentStock > p.reorderPoint).length})
+                        </button>
+                        <button
+                            onClick={() => setStockFilter('low-stock')}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                stockFilter === 'low-stock' 
+                                    ? 'bg-orange-600 text-white' 
+                                    : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                            }`}
+                        >
+                            Low Stock ({products.filter(p => p.currentStock > 0 && p.currentStock <= p.reorderPoint).length})
+                        </button>
+                        <button
+                            onClick={() => setStockFilter('out-of-stock')}
+                            className={`px-3 py-2 rounded-lg text-sm font-medium transition ${
+                                stockFilter === 'out-of-stock' 
+                                    ? 'bg-red-600 text-white' 
+                                    : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                            }`}
+                        >
+                            Out of Stock ({products.filter(p => p.currentStock === 0).length})
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
-                {filteredProducts.length === 0 ? (
+                {sortedProducts.length === 0 ? (
                     <div className="text-center py-8">
                         <svg className="w-16 h-16 mx-auto text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                         </svg>
                         <p className="text-gray-400 mb-4">
-                            {searchTerm ? 'No products match your search.' : 'No products found. Add your first product!'}
+                            {searchTerm || stockFilter !== 'all' ? 'No products match your filters.' : 'No products found. Add your first product!'}
                         </p>
-                        {!searchTerm && (
+                        {!searchTerm && stockFilter === 'all' && (
                             <Link
                                 to="/add-product"
                                 className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -119,23 +234,51 @@ const ProductCatalog = () => {
                                 Add Product
                             </Link>
                         )}
+                        {(searchTerm || stockFilter !== 'all') && (
+                            <button
+                                onClick={() => { setSearchTerm(''); setStockFilter('all'); }}
+                                className="px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+                            >
+                                Clear Filters
+                            </button>
+                        )}
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
                             <thead>
                                 <tr className="border-b border-slate-700">
-                                    <th className="text-left py-3 px-4 text-gray-400 font-medium">Name</th>
-                                    <th className="text-left py-3 px-4 text-gray-400 font-medium">SKU</th>
-                                    <th className="text-left py-3 px-4 text-gray-400 font-medium">Cost</th>
-                                    <th className="text-left py-3 px-4 text-gray-400 font-medium">Stock</th>
+                                    <th 
+                                        className="text-left py-3 px-4 text-gray-400 font-medium cursor-pointer hover:text-white"
+                                        onClick={() => handleSort('name')}
+                                    >
+                                        Name <SortIcon column="name" />
+                                    </th>
+                                    <th 
+                                        className="text-left py-3 px-4 text-gray-400 font-medium cursor-pointer hover:text-white"
+                                        onClick={() => handleSort('sku')}
+                                    >
+                                        SKU <SortIcon column="sku" />
+                                    </th>
+                                    <th 
+                                        className="text-left py-3 px-4 text-gray-400 font-medium cursor-pointer hover:text-white"
+                                        onClick={() => handleSort('cost')}
+                                    >
+                                        Cost <SortIcon column="cost" />
+                                    </th>
+                                    <th 
+                                        className="text-left py-3 px-4 text-gray-400 font-medium cursor-pointer hover:text-white"
+                                        onClick={() => handleSort('stock')}
+                                    >
+                                        Stock <SortIcon column="stock" />
+                                    </th>
                                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Reorder Point</th>
                                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Status</th>
                                     <th className="text-left py-3 px-4 text-gray-400 font-medium">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {filteredProducts.map((product) => (
+                                {sortedProducts.map((product) => (
                                     <tr key={product.id} className="border-b border-slate-700 hover:bg-slate-700/50">
                                         <td className="py-3 px-4">
                                             {editingProduct === product.id ? (
@@ -263,6 +406,13 @@ const ProductCatalog = () => {
                     </div>
                 )}
             </div>
+
+            {/* Results count */}
+            {products.length > 0 && (
+                <p className="text-gray-400 text-sm mt-4">
+                    Showing {sortedProducts.length} of {products.length} products
+                </p>
+            )}
 
             {/* Delete Confirmation Modal */}
             {deleteConfirm && (
