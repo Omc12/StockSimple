@@ -63,7 +63,7 @@ const Reports = () => {
             </div>
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
               <p className="text-gray-400 text-sm">Total Inventory Value</p>
-              <p className="text-3xl font-bold text-green-400 mt-2">${totalValue.toFixed(2)}</p>
+              <p className="text-3xl font-bold text-green-400 mt-2">₹{totalValue.toFixed(2)}</p>
             </div>
             <div className="bg-slate-800 border border-slate-700 rounded-xl p-6">
               <p className="text-gray-400 text-sm">Low Stock Items</p>

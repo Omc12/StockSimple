@@ -302,7 +302,7 @@ const ProductCatalog = () => {
                                                     className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white w-20"
                                                 />
                                             ) : (
-                                                <span className="text-white">${product.cost.toFixed(2)}</span>
+                                                <span className="text-white">₹{product.cost.toFixed(2)}</span>
                                             )}
                                         </td>
                                         <td className="py-3 px-4">
