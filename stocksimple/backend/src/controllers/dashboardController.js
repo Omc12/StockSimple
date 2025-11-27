@@ -4,7 +4,7 @@ const prisma = new PrismaClient();
 
 const getAlerts = async (req, res) => {
     try {
-        // Get all products where current stock is less than or equal to reorder point
+        // all products less than or equal to reorder amount
         const products = await prisma.product.findMany({
             orderBy: { currentStock: 'asc' },
         });
