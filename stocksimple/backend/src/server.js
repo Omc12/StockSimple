@@ -11,11 +11,24 @@ const errorHandler = require('./middleware/errorHandler');
 
 const app = express();
 
-// CORS - Allow all origins
-app.use(cors());
+// CORS - Allow all origins with explicit configuration
+app.use(cors({
+  origin: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+}));
+
+// Manually handle preflight for all routes
+app.options('*', cors());
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Test endpoint to verify API routes work
+app.get('/api/test', (req, res) => {
+  res.json({ status: 'OK', message: 'API routes working' });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
