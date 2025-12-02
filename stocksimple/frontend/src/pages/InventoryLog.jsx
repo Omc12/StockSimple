@@ -11,6 +11,10 @@ const InventoryLog = () => {
     const [sortBy, setSortBy] = useState('date');
     const [sortOrder, setSortOrder] = useState('desc');
     const [dateRange, setDateRange] = useState('all');
+    
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(10);
 
     useEffect(() => {
         fetchMovements();
@@ -102,6 +106,22 @@ const InventoryLog = () => {
         if (compareA > compareB) return sortOrder === 'asc' ? 1 : -1;
         return 0;
     });
+
+    // Pagination logic
+    const totalPages = Math.ceil(sortedMovements.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const paginatedMovements = sortedMovements.slice(startIndex, endIndex);
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchTerm, filter, dateRange, sortBy, sortOrder]);
+
+    const handlePageChange = (page) => {
+        setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
 
     const SortIcon = ({ column }) => (
         <span className="ml-1 inline-block">
@@ -261,7 +281,7 @@ const InventoryLog = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {sortedMovements.map((movement) => (
+                                {paginatedMovements.map((movement) => (
                                     <tr key={movement.id} className="border-b border-slate-700 hover:bg-slate-700/50">
                                         <td className="py-3 px-4 text-gray-300 text-sm">
                                             {formatDate(movement.createdAt)}
@@ -302,11 +322,104 @@ const InventoryLog = () => {
                 )}
             </div>
 
-            {/* Results count */}
-            {movements.length > 0 && (
-                <p className="text-gray-400 text-sm mt-4">
-                    Showing {sortedMovements.length} of {movements.length} movements
-                </p>
+            {/* Pagination Controls */}
+            {sortedMovements.length > 0 && (
+                <div className="mt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="flex items-center gap-4">
+                        <p className="text-gray-400 text-sm">
+                            Showing {startIndex + 1} to {Math.min(endIndex, sortedMovements.length)} of {sortedMovements.length} movements
+                        </p>
+                        <div className="flex items-center gap-2">
+                            <label className="text-gray-400 text-sm">Per page:</label>
+                            <select
+                                value={itemsPerPage}
+                                onChange={(e) => {
+                                    setItemsPerPage(Number(e.target.value));
+                                    setCurrentPage(1);
+                                }}
+                                className="bg-slate-700 border border-slate-600 rounded px-2 py-1 text-white text-sm"
+                            >
+                                <option value={5}>5</option>
+                                <option value={10}>10</option>
+                                <option value={25}>25</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => handlePageChange(1)}
+                                disabled={currentPage === 1}
+                                className="px-3 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className="px-3 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+                            
+                            <div className="flex items-center gap-1">
+                                {[...Array(totalPages)].map((_, index) => {
+                                    const page = index + 1;
+                                    if (
+                                        page === 1 ||
+                                        page === totalPages ||
+                                        (page >= currentPage - 1 && page <= currentPage + 1)
+                                    ) {
+                                        return (
+                                            <button
+                                                key={page}
+                                                onClick={() => handlePageChange(page)}
+                                                className={`px-3 py-2 rounded-lg text-sm font-medium ${
+                                                    currentPage === page
+                                                        ? 'bg-blue-600 text-white'
+                                                        : 'bg-slate-700 text-gray-300 hover:bg-slate-600'
+                                                }`}
+                                            >
+                                                {page}
+                                            </button>
+                                        );
+                                    } else if (
+                                        (page === currentPage - 2 && currentPage > 3) ||
+                                        (page === currentPage + 2 && currentPage < totalPages - 2)
+                                    ) {
+                                        return <span key={page} className="text-gray-500 px-1">...</span>;
+                                    }
+                                    return null;
+                                })}
+                            </div>
+                            
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                            <button
+                                onClick={() => handlePageChange(totalPages)}
+                                disabled={currentPage === totalPages}
+                                className="px-3 py-2 bg-slate-700 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-600"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    )}
+                </div>
             )}
 
             {/* Summary Stats */}

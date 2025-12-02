@@ -122,4 +122,22 @@ const refresh = async (req, res) => {
     res.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
 };
 
-module.exports = { register, login, refresh };
+const logout = async (req, res) => {
+    const { refreshToken } = req.body;
+    
+    // Revoke the refresh token if provided and DB table exists
+    if (refreshToken) {
+        try {
+            await prisma.refreshToken.update({
+                where: { token: refreshToken },
+                data: { revoked: true }
+            });
+        } catch (_) {
+            // Silently ignore if token doesn't exist or DB issue
+        }
+    }
+
+    res.json({ message: 'Logged out successfully' });
+};
+
+module.exports = { register, login, refresh, logout };

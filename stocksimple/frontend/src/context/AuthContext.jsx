@@ -39,9 +39,19 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
-  const logout = () => {
+  const logout = async () => {
+    // Best-effort server-side logout
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (refreshToken) {
+      try {
+        await authAPI.logout(refreshToken);
+      } catch (_) {
+        // Silently ignore logout API errors
+      }
+    }
+    
     localStorage.removeItem('token');
-  localStorage.removeItem('refreshToken');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
     setUser(null);
   };
