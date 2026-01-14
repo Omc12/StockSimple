@@ -1,4 +1,4 @@
-mall Business Stock Tracker & Reorder Alert System
+Small Business Stock Tracker & Reorder Alert System
 
 Project Title
 StockSimple – Essential Inventory and Low-Stock Alert Dashboard 2. Problem Statement
